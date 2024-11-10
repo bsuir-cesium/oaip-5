@@ -13,92 +13,238 @@ procedure GenerateRandomArray(var arr: TMAS);
 var
   i: integer;
 begin
-    for i := 0 to n - 1 do
-    begin
-        arr[i] := Random(200);
-    end;
+  for i := 0 to n - 1 do
+  begin
+    arr[i] := Random(100);
+  end;
 end;
 
 procedure PrintArray(var arr: TMAS);
 var
   i: integer;
 begin
-    for i := 0 to n - 1 do
-    begin
-        write(arr[i], ' ');
-    end;
-    writeln;
+  for i := 0 to n - 1 do
+  begin
+    write(arr[i], ' ');
+  end;
+  writeln;
 end;
 
-procedure PuzyrekModSort(var arr: TMAS);
+procedure PuzyrekModSort(var arr: TMAS; const n: integer;
+  var comparisons, transpositions: integer); { Пузырёк с границей }
 var
-  i, j, k, temp: integer;
+  i, j, temp, lastSwap: integer;
 begin
+  comparisons := 0;
+  transpositions := 0;
   i := 1;
-  while i <= n do
+  while i <= n - 1 do
   begin
-    k := n;
-    j := n;
+    lastSwap := n - 1;
+    j := n - 1;
+
     while j >= i do
     begin
+      Inc(comparisons);
       if arr[j - 1] > arr[j] then
       begin
         temp := arr[j - 1];
         arr[j - 1] := arr[j];
         arr[j] := temp;
-        k := j;
+        lastSwap := j;
+        Inc(transpositions);
       end;
       j := j - 1;
     end;
-    i := K +1;
+
+    i := lastSwap + 1;
   end;
 end;
 
-procedure ShakeSort(var arr: TMAS);
-var firstIndex, lastIndex, i, temp: integer;
+procedure ShakeSort(var arr: TMAS; const n: integer;
+  var comparisons, transpositions: integer);
+var
+  left, right, i, temp: integer;
+  flag: boolean;
 begin
-  firstIndex := 0;
-  lastIndex := n - 1;
+  comparisons := 0;
+  transpositions := 0;
+  left := 0;
+  right := n - 1;
+  flag := true;
 
-  while firstIndex < lastIndex do
+  while (left < right) and flag do
   begin
-    for i:= firstIndex to lastIndex-1 do
-      if arr[i] > arr[i+1] then
+    flag := false;
+    for i := left to right - 1 do
+    begin
+      if arr[i] > arr[i + 1] then
       begin
-        {обмен элементов}
         temp := arr[i];
-        arr[i] := arr[i+1];
-        arr[i+1] := temp;
+        arr[i] := arr[i + 1];
+        arr[i + 1] := temp;
+        flag := true;
+        Inc(transpositions);
       end;
+      Inc(comparisons);
+    end;
+    right := right - 1;
 
-    for i:= lastIndex downto firstIndex+1 do
-      if arr[i] < arr[i-1] then
+    for i := right downto left + 1 do
+    begin
+      if arr[i] < arr[i - 1] then
       begin
-        {обмен элементов}
         temp := arr[i];
-        arr[i] := arr[i-1];
-        arr[i-1] := temp;
+        arr[i] := arr[i - 1];
+        arr[i - 1] := temp;
+        flag := true;
+        Inc(transpositions);
       end;
+      Inc(comparisons);
+    end;
 
-    firstIndex := firstIndex + 1;
-    lastIndex := lastIndex - 1;
+    left := left + 1;
+
+    if not flag then
+      break;
   end;
+end;
+
+procedure ReverseArray(var arr: TMAS; len, count: integer);
+var
+  i, temp: integer;
+begin
+  i := 0;
+  while (i <= len - 1) and (count > 0) do
+  begin
+    temp := arr[len - i - 1];
+    arr[len - i - 1] := arr[i];
+    arr[i] := temp;
+    i := i + 1;
+    count := count - 1;
+  end;
+
 end;
 
 var
-  originalArray, arr1, arr2: TMAS;
+  originalArray, arrayPuzyrek, arrayShake: TMAS;
+  comparisonsPuzyrek, comparisonsShake, transpositionsPuzyrek,
+    transpositionsShake: integer;
+
 begin
   GenerateRandomArray(originalArray);
+  arrayPuzyrek := originalArray;
+  arrayShake := originalArray;
 
-  arr1 := originalArray;
-  arr2 := originalArray;
+  writeln('___________________________________________________________________________________');
+  writeln('|             |                                 |                                 |');
+  writeln('|             |        Улучшенный пузырек       |        Шейкерная сортировка     |');
+  writeln('| Тип массива |_________________________________|_________________________________|');
+  writeln('|             |    Сравнения   |  Перестановки  |    Сравнения   |  Перестановки  |');
+  writeln('|_____________|________________|________________|________________|________________|');
 
-  PuzyrekModSort(arr1);
-  ShakeSort(arr2);
+  PuzyrekModSort(arrayPuzyrek, 10, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 10, comparisonsShake, transpositionsShake);
 
-  PrintArray(arr1);
-  writeln('------------------------------------------------------------------------');
-  PrintArray(arr2);
+  writeln('|             |                |                |                |                |');
+  writeln('|   10 эл.    |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   неотсорт  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
 
+  PuzyrekModSort(arrayPuzyrek, 10, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 10, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   10 эл.    |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   отсорт    |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  ReverseArray(arrayPuzyrek, n, 10);
+  ReverseArray(arrayShake, n, 10);
+
+  PuzyrekModSort(arrayPuzyrek, 10, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 10, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   10 эл.    |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|  обр. пор.  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  arrayPuzyrek := originalArray;
+  arrayShake := originalArray;
+  PuzyrekModSort(arrayPuzyrek, 100, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 100, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   100 эл.   |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   неотсорт  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  PuzyrekModSort(arrayPuzyrek, 100, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 100, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   100 эл.   |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   отсорт    |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  ReverseArray(arrayPuzyrek, n, 100);
+  ReverseArray(arrayShake, n, 100);
+
+  PuzyrekModSort(arrayPuzyrek, 100, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 100, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|  100 эл.    |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|  обр. пор.  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  arrayPuzyrek := originalArray;
+  arrayShake := originalArray;
+  PuzyrekModSort(arrayPuzyrek, 2000, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 2000, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   2000 эл.  |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   неотсорт  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  PuzyrekModSort(arrayPuzyrek, 2000, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 2000, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|   2000 эл.  |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|   отсорт    |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
+
+  ReverseArray(arrayPuzyrek, n, 1000);
+  ReverseArray(arrayShake, n, 1000);
+
+  PuzyrekModSort(arrayPuzyrek, 2000, comparisonsPuzyrek, transpositionsPuzyrek);
+  ShakeSort(arrayShake, 2000, comparisonsShake, transpositionsShake);
+
+  writeln('|             |                |                |                |                |');
+  writeln('|  2000 эл.   |  ', comparisonsPuzyrek:12, '  |  ',
+    transpositionsPuzyrek:12, '  |  ', comparisonsShake:12, '  |  ',
+    transpositionsShake:12, '  |');
+  writeln('|  обр. пор.  |                |                |                |                |');
+  writeln('|_____________|________________|________________|________________|________________|');
   readln;
+
 end.
