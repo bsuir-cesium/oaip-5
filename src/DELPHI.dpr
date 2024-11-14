@@ -50,7 +50,6 @@ begin
 
     while j >= i do
     begin
-      Inc(comparisons);
       if arr[j - 1] > arr[j] then
       begin
         temp := arr[j - 1];
@@ -59,6 +58,7 @@ begin
         lastSwap := j;
         Inc(transpositions);
       end;
+      Inc(comparisons);
       j := j - 1;
     end;
 
