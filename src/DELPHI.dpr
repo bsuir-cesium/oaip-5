@@ -9,6 +9,11 @@ const
 type
   TMAS = array [0 .. n - 1] of integer;
 
+var
+  originalArray, arrayPuzyrek, arrayShake: TMAS;
+  comparisonsPuzyrek, comparisonsShake, transpositionsPuzyrek,
+  transpositionsShake: uint64;
+
 procedure GenerateRandomArray(var arr: TMAS);
 var
   i: integer;
@@ -31,7 +36,7 @@ begin
 end;
 
 procedure PuzyrekModSort(var arr: TMAS; const n: integer;
-  var comparisons, transpositions: integer); { Пузырёк с границей }
+  var comparisons, transpositions: uint64); { Пузырёк с границей }
 var
   i, j, temp, lastSwap: integer;
 begin
@@ -62,51 +67,51 @@ begin
 end;
 
 procedure ShakeSort(var arr: TMAS; const n: integer;
-  var comparisons, transpositions: integer);
+  var comparisons, transpositions: uint64);
 var
-  left, right, i, temp: integer;
-  flag: boolean;
+  left, right, i, temp, lastSwap: Integer;
 begin
   comparisons := 0;
   transpositions := 0;
   left := 0;
   right := n - 1;
-  flag := true;
+  lastSwap := 0;
 
-  while (left < right) and flag do
+  while right > left do
   begin
-    flag := false;
+
+    // Проход слева направо
     for i := left to right - 1 do
     begin
-      if arr[i] > arr[i + 1] then
+      if (arr[i] > arr[i + 1]) then
       begin
+        // Обмен элементами
         temp := arr[i];
         arr[i] := arr[i + 1];
         arr[i + 1] := temp;
-        flag := true;
+
+        lastSwap := i;
         Inc(transpositions);
       end;
       Inc(comparisons);
     end;
-    right := right - 1;
+    right := lastSwap;
 
     for i := right downto left + 1 do
     begin
-      if arr[i] < arr[i - 1] then
+      if (arr[i] < arr[i - 1]) then
       begin
         temp := arr[i];
         arr[i] := arr[i - 1];
         arr[i - 1] := temp;
-        flag := true;
+
+        lastSwap := i;
         Inc(transpositions);
       end;
       Inc(comparisons);
     end;
+    left := lastSwap;
 
-    left := left + 1;
-
-    if not flag then
-      break;
   end;
 end;
 
@@ -125,11 +130,6 @@ begin
   end;
 
 end;
-
-var
-  originalArray, arrayPuzyrek, arrayShake: TMAS;
-  comparisonsPuzyrek, comparisonsShake, transpositionsPuzyrek,
-    transpositionsShake: integer;
 
 begin
   GenerateRandomArray(originalArray);
